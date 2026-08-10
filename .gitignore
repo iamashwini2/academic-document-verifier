@@ -1,0 +1,49 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+.env.*
+*.sqlite3
+.DS_Store
+Thumbs.db
+
+# Flask / Python build artifacts
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+htmlcov/
+.coverage
+coverage.xml
+.pytest_cache/
+
+# Frontend / Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.cache/
+
+# Generated files and uploads
+uploads/
+processed/
+logs/
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# npm / package manager logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
