@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -13,13 +14,14 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from ocr.field_extractor import extract_fields
-from classifier import classify_document
-from summarizer import summarize_academic_data
+from backend.classifier import classify_document
+from backend.summarizer import summarize_academic_data
 
-pytesseract.pytesseract.tesseract_cmd = os.environ.get(
-    "TESSERACT_PATH",
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-)
+tesseract_path = os.environ.get("TESSERACT_PATH") or shutil.which("tesseract")
+if not tesseract_path:
+    tesseract_path = "/usr/bin/tesseract"
+if os.path.exists(tesseract_path):
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 
 def image_to_text(image_path):

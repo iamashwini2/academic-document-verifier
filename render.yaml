@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: academic-document-verifier-api
+    env: python
+    plan: free
+    rootDir: .
+    pythonVersion: 3.13.0
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend.app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: FLASK_DEBUG
+        value: 0
+      - key: HOST
+        value: 0.0.0.0
+      - key: CORS_ORIGINS
+        value: https://your-vercel-app.vercel.app
+      - key: TESSERACT_PATH
+        value: ""

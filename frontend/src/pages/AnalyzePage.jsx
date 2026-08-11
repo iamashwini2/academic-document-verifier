@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:5000";
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
 function AnalyzePage() {
   const [file, setFile] = useState(null);
@@ -45,7 +45,8 @@ function AnalyzePage() {
     formData.append("file", file);
 
     try {
-      const response = await fetch(`${API_URL}/api/analyze`, {
+      const endpoint = API_URL ? `${API_URL}/api/analyze` : "/api/analyze";
+      const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
       });

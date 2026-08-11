@@ -6,19 +6,29 @@ from pathlib import Path
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.utils import secure_filename
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from analyzer import analyze_document
-from comparison import compare_documents
-from security import is_allowed_file
+from backend.analyzer import analyze_document
+from backend.comparison import compare_documents
+from backend.security import is_allowed_file
+
+
+def get_cors_origins():
+    configured = os.environ.get("CORS_ORIGINS", "").strip()
+    origins = [origin.strip() for origin in configured.split(",") if origin.strip()]
+    if not origins:
+        origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    return origins
+
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 app.config["JSON_SORT_KEYS"] = False
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": get_cors_origins()}})
 
 def error_response(message, status_code=400):
     return jsonify({"success": False, "error": message}), status_code
@@ -47,10 +57,14 @@ def analyze():
     if not file or file.filename == "":
         return error_response("No file selected.")
 
-    if not is_allowed_file(file.filename):
+    safe_name = secure_filename(file.filename)
+    if not safe_name:
+        return error_response("Invalid file name.")
+
+    if not is_allowed_file(safe_name):
         return error_response("Unsupported file type. Please upload PNG, JPG, JPEG or PDF.")
 
-    suffix = Path(file.filename).suffix.lower()
+    suffix = Path(safe_name).suffix.lower()
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
         file.save(temp_file)
         temp_path = temp_file.name
@@ -86,13 +100,18 @@ def compare():
     if not document1 or not document2:
         return error_response("Please upload two academic documents for comparison.")
 
-    if not is_allowed_file(document1.filename) or not is_allowed_file(document2.filename):
+    safe_name_1 = secure_filename(document1.filename)
+    safe_name_2 = secure_filename(document2.filename)
+    if not safe_name_1 or not safe_name_2:
+        return error_response("Invalid file name.")
+
+    if not is_allowed_file(safe_name_1) or not is_allowed_file(safe_name_2):
         return error_response("Unsupported file type. Please upload PNG, JPG, JPEG or PDF.")
 
     temp_files = []
     try:
-        for document in (document1, document2):
-            suffix = Path(document.filename).suffix.lower()
+        for document, safe_name in ((document1, safe_name_1), (document2, safe_name_2)):
+            suffix = Path(safe_name).suffix.lower()
             temp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
             document.save(temp)
             temp.close()
@@ -128,7 +147,7 @@ if __name__ == "__main__":
     print()
 
     app.run(
-        host=os.environ.get("HOST", "127.0.0.1"),
+        host=os.environ.get("HOST", "0.0.0.0"),
         port=int(os.environ.get("PORT", 5000)),
-        debug=os.environ.get("FLASK_DEBUG", "1") != "0",
+        debug=os.environ.get("FLASK_DEBUG", "0") != "0",
     )

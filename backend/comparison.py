@@ -1,4 +1,4 @@
-from analyzer import analyze_document
+from backend.analyzer import analyze_document
 
 COMPARE_FIELDS = [
     "name",

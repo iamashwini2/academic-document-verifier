@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:5000";
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
 function ComparePage() {
   const [file1, setFile1] = useState(null);
@@ -46,7 +46,8 @@ function ComparePage() {
     formData.append("document2", file2);
 
     try {
-      const response = await fetch(`${API_URL}/api/compare`, {
+      const endpoint = API_URL ? `${API_URL}/api/compare` : "/api/compare";
+      const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
       });

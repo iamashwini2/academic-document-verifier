@@ -1,5 +1,6 @@
 # Python
 venv/
+.venv/
 __pycache__/
 *.pyc
 *.pyo
@@ -7,6 +8,7 @@ __pycache__/
 *.env
 .env
 .env.*
+!.env.example
 *.sqlite3
 .DS_Store
 Thumbs.db
